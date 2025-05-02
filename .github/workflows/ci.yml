@@ -1,0 +1,27 @@
+name: ci
+
+on:
+  - push
+
+jobs:
+  ci:
+    name: ci
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Check code quality
+        run: make checks
+      - name: Build packages
+        run: make
+      - name: Publish packages
+        if: github.ref_name == 'main'
+        run: |
+          echo '//registry.npmjs.org/:_authToken=${NPM_AUTH_TOKEN}' > .npmrc
+          make publish
+        env:
+          NPM_AUTH_TOKEN: ${{ secrets.NPM_PUBLISH_TOKEN }}
