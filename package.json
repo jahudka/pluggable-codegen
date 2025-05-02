@@ -13,7 +13,7 @@
     "dist"
   ],
   "bin": {
-    "pluggable-codegen": "./dist/cli.js"
+    "pluggable-codegen": "dist/cli.js"
   },
   "type": "module",
   "types": "./dist/index.d.ts",
