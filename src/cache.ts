@@ -39,7 +39,7 @@ export class Cache {
 
     const entry = cacheData.get(output);
 
-    if (!entry || entry.source !== sourceHash || entry.output !== outputHash) {
+    if (entry && entry.source === sourceHash && entry.output === outputHash) {
       return;
     }
 
