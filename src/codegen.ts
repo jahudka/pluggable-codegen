@@ -6,6 +6,7 @@ import { Cache } from './cache';
 import { File } from './file';
 import { normalizeJobs, normalizeOptions } from './options';
 import type { CodegenInput, CodegenJob, CodegenOptions, NormalizedCodegenOptions } from './types';
+import { hash } from './utils';
 
 export class Codegen {
   readonly #options: NormalizedCodegenOptions;
@@ -37,7 +38,7 @@ export class Codegen {
 
   private constructor(options: NormalizedCodegenOptions, jobs: CodegenJob[]) {
     this.#options = options;
-    this.#cache = new Cache(options.cacheFile);
+    this.#cache = new Cache(options.rootDir, options.cacheFile);
     this.#jobs = this.#createJobMap(jobs);
   }
 
@@ -68,11 +69,11 @@ export class Codegen {
       let output = await job.generate(files, controller.signal);
 
       if (output === null) {
-        return false;
+        return undefined;
       }
 
       if (controller.signal.aborted) {
-        return false;
+        return undefined;
       }
 
       if (typeof output === 'string' && (job.eslint ?? this.#options.eslint)) {
@@ -80,7 +81,7 @@ export class Codegen {
       }
 
       if (controller.signal.aborted) {
-        return false;
+        return undefined;
       }
 
       if (typeof output === 'string' && (job.prettier ?? this.#options.prettier)) {
@@ -88,7 +89,7 @@ export class Codegen {
       }
 
       if (controller.signal.aborted) {
-        return false;
+        return undefined;
       }
 
       try {
@@ -98,7 +99,7 @@ export class Codegen {
       }
 
       await writeFile(file, output);
-      return true;
+      return hash(output);
     });
   }
 

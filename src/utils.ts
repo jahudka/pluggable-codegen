@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 import { dirname, resolve } from 'node:path';
 
 export async function lookupPath<R>(
@@ -28,4 +29,10 @@ export async function lookupPath<R>(
     dir = dirname(dir);
     return dir !== orig;
   }
+}
+
+export function hash(data: Buffer | string): string {
+  const hash = createHash('sha256');
+  hash.update(data);
+  return hash.digest('hex');
 }
