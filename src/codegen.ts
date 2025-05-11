@@ -108,7 +108,7 @@ export class Codegen {
       absolute: true,
     });
 
-    return files.map((path) => new File(path, this.#options.rootDir));
+    return files.sort().map((path) => new File(path, this.#options.rootDir));
   }
 
   async #applyESLint(source: string, path: string): Promise<string> {
