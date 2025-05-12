@@ -27,6 +27,7 @@ config file (which is useful if you want to run the codegen standalone).
 
 ```typescript
 // codegen.config.js
+import { defineCodegen } from 'pluggable-codegen';
 
 export default defineCodegen(
   // optional global config; default values shown
@@ -53,11 +54,12 @@ export default defineCodegen(
       // you can also return null, in which case nothing will be written
       return `export const fileList = ${JSON.stringify(files)};`;
     },
-    // set to 'files' if your generated output is based only on the file names,
-    // or to 'contents' if the output is based on the files' contents:
+    // set to 'files' if your generated output is based only on
+    // the list of file names, or to 'contents' if the output is
+    // based on the files' contents:
     cacheBy: undefined,
-    // you can override the global 'eslint', 'prettier', and 'glob' options
-    // per-job:
+    // you can override the global 'eslint', 'prettier',
+    // and 'glob' options per-job:
     // prettier: false,
   },
 );
@@ -82,8 +84,7 @@ import { codegen } from 'pluggable-codegen';
 
 export default defineConfig({
   plugins: [
-    codegen(),
-    // same arguments as defineCodegen()
+    codegen(), // same arguments as defineCodegen()
   ],
 });
 ```
@@ -139,8 +140,8 @@ generates type-safe helpers for generating URLs from routes in SvelteKit.
 
 ### GraphQL Codegen
 
-This preset wraps the `graphql-code-generator` codegen so that you don't
+This preset wraps the `graphql-code-generator` package so that you don't
 have to run `gql-gen --watch` separately. It doesn't accept any options;
-simply configure `gql-gen` using the `graphql.config.yml` file as you would if
+simply configure `gql-gen` using a `graphql.config.yml` file as you would if
 you used `gql-gen` standalone and add the `gqlgen()` job exported from
 `pluggable-codegen/presets/graphql-code-generator`.
