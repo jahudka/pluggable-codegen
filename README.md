@@ -134,7 +134,7 @@ declare class File {
 
 ### SvelteKit Routegen
 
-The [`sveltekit-routegen`](https://www.npmjs.com/package/sveltekit-routegen)
+The [`sveltekit-routegen`](https://github.com/jahudka/sveltekit-routegen)
 package (which you can install separately) exports a codegen preset which
 generates type-safe helpers for generating URLs from routes in SvelteKit.
 
