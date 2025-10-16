@@ -2,13 +2,13 @@
   "name": "pluggable-codegen",
   "version": "0.2.3",
   "license": "MIT",
-  "homepage": "https://github.com/jahudka/sveltekit-routegen",
+  "homepage": "https://github.com/jahudka/pluggable-codegen",
   "repository": {
     "type": "git",
-    "url": "https://github.com/jahudka/sveltekit-routegen.git"
+    "url": "https://github.com/jahudka/pluggable-codegen.git"
   },
   "bugs": {
-    "url": "https://github.com/jahudka/sveltekit-routegen/issues"
+    "url": "https://github.com/jahudka/pluggable-codegen/issues"
   },
   "maintainers": [
     {
