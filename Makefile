@@ -38,11 +38,11 @@ pretty: lint-fix style-fix
 checks: lint style types
 
 .PHONY: build
-build: dist
+build: deps dist
 
-dist: deps
+dist:
 	node_modules/.bin/tsup
 
 .PHONY: publish
-publish: dist
+publish: build
 	npm view "$$( jq -r '.name + "@>=" + .version' package.json )" version >/dev/null 2>&1 || npm publish
