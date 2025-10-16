@@ -5,7 +5,7 @@
   "homepage": "https://github.com/jahudka/pluggable-codegen",
   "repository": {
     "type": "git",
-    "url": "https://github.com/jahudka/pluggable-codegen.git"
+    "url": "git+https://github.com/jahudka/pluggable-codegen.git"
   },
   "bugs": {
     "url": "https://github.com/jahudka/pluggable-codegen/issues"
