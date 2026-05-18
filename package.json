@@ -1,6 +1,6 @@
 {
   "name": "pluggable-codegen",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "license": "MIT",
   "homepage": "https://github.com/jahudka/pluggable-codegen",
   "repository": {
@@ -21,7 +21,7 @@
     "dist"
   ],
   "bin": {
-    "pluggable-codegen": "dist/cli.js"
+    "pluggable-codegen": "dist/cli.mjs"
   },
   "type": "module",
   "types": "./dist/index.d.ts",
