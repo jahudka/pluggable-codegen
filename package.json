@@ -1,6 +1,6 @@
 {
   "name": "pluggable-codegen",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "license": "MIT",
   "homepage": "https://github.com/jahudka/pluggable-codegen",
   "repository": {
@@ -26,17 +26,17 @@
   "type": "module",
   "types": "./dist/index.d.ts",
   "main": "./dist/index.cjs",
-  "module": "./dist/index.js",
+  "module": "./dist/index.mjs",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
       "require": "./dist/index.cjs",
-      "import": "./dist/index.js"
+      "import": "./dist/index.mjs"
     },
     "./presets/*": {
       "types": "./dist/presets/*.d.ts",
       "require": "./dist/presets/*.cjs",
-      "import": "./dist/presets/*.js"
+      "import": "./dist/presets/*.mjs"
     }
   },
   "packageManager": "pnpm@10.30.1",
