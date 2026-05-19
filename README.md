@@ -58,6 +58,10 @@ export default defineCodegen(
     // the list of file names, or to 'contents' if the output is
     // based on the files' contents:
     cacheBy: undefined,
+    // provide an array of additional glob patterns to consider when
+    // checking the cache; this can include e.g. `import.meta.filename`
+    // to make the job rebuild when its definition changes
+    extraDeps: undefined,
     // you can override the global 'eslint', 'prettier',
     // and 'glob' options per-job:
     // prettier: false,

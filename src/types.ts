@@ -21,6 +21,7 @@ export type CodegenJob = {
   output: string;
   generate: (files: File[], signal: AbortSignal) => MaybePromise<Buffer | string | null>;
   cacheBy?: 'files' | 'contents';
+  extraDeps?: string[];
   prettier?: boolean;
   eslint?: boolean;
 };

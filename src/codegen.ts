@@ -62,9 +62,10 @@ export class Codegen {
     const controller = new AbortController();
     this.#running.set(job, controller);
 
-    const files = await this.#scanFiles(job);
+    const files = await this.#scanFiles(job.input);
+    const extraDeps = job.extraDeps?.length ? await this.#scanFiles(job.extraDeps) : [];
 
-    await this.#cache.check(files, job.output, job.cacheBy, async () => {
+    await this.#cache.check([...files, ...extraDeps], job.output, job.cacheBy, async () => {
       const file = resolve(this.#options.rootDir, job.output);
       let output;
 
@@ -112,8 +113,8 @@ export class Codegen {
     });
   }
 
-  async #scanFiles(job: CodegenJob): Promise<File[]> {
-    const files = await glob(job.input, {
+  async #scanFiles(patterns: string[] | string): Promise<File[]> {
+    const files = await glob(patterns, {
       cwd: this.#options.rootDir,
       absolute: true,
     });
@@ -160,12 +161,9 @@ export class Codegen {
 
   #createMatcher(job: CodegenJob): Matcher {
     const root = escapePath(this.#options.rootDir);
+    const patterns = [job.input, job.extraDeps ?? []];
 
-    return picomatch(
-      Array.isArray(job.input)
-        ? job.input.map((pattern) => `${root}/${pattern.replace(/^\//, '')}`)
-        : `${root}/${job.input.replace(/^\//, '')}`,
-    );
+    return picomatch(patterns.flat().map((pattern) => resolve(root, pattern)));
   }
 }
 
