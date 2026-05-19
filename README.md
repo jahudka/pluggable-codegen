@@ -136,16 +136,10 @@ declare class File {
 
 ## Presets
 
-### SvelteKit Routegen
-
-The [`sveltekit-routegen`](https://github.com/jahudka/sveltekit-routegen)
-package (which you can install separately) exports a codegen preset which
-generates type-safe helpers for generating URLs from routes in SvelteKit.
-
 ### GraphQL Codegen
 
-This preset wraps the `graphql-code-generator` package so that you don't
-have to run `gql-gen --watch` separately. It doesn't accept any options;
-simply configure `gql-gen` using a `graphql.config.yml` file as you would if
-you used `gql-gen` standalone and add the `gqlgen()` job exported from
-`pluggable-codegen/presets/graphql-code-generator`.
+This preset wraps the `@graphql-codegen/cli` package so that you don't
+have to run `graphql-codegen --watch` separately. It doesn't accept any options;
+simply configure `graphql-codegen` using a `codegen.yml` file as you would if
+you used `graphql-codegen` standalone and add the `graphqlCodegen()` job
+exported from `pluggable-codegen/presets/graphql-codegen`.
