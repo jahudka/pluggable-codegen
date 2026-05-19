@@ -66,7 +66,16 @@ export class Codegen {
 
     await this.#cache.check(files, job.output, job.cacheBy, async () => {
       const file = resolve(this.#options.rootDir, job.output);
-      let output = await job.generate(files, controller.signal);
+      let output;
+
+      try {
+        output = await job.generate(files, controller.signal);
+      } catch (e: any) {
+        console.log(`\nError while generating '${job.output}':`);
+        console.log(e);
+        console.log('');
+        return undefined;
+      }
 
       if (output === null) {
         return undefined;
