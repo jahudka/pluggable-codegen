@@ -49,7 +49,7 @@ async function resolveCacheFile(
     return undefined;
   }
 
-  cacheFile = codegenPath.replace(/^(.+\/node_modules)\/.*$/, '$1/.cache/pluggable-codegen.json');
+  cacheFile = codegenPath.replace(/^(.+?\/node_modules)\/.*$/, '$1/.cache/pluggable-codegen.json');
 
   try {
     await mkdir(dirname(cacheFile), { recursive: true, mode: 0o750 });
