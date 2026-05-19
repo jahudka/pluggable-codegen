@@ -66,50 +66,48 @@ export class Codegen {
     const extraDeps = job.extraDeps?.length ? await this.#scanFiles(job.extraDeps) : [];
 
     await this.#cache.check([...files, ...extraDeps], job.output, job.cacheBy, async () => {
-      const file = resolve(this.#options.rootDir, job.output);
-      let output;
-
       try {
-        output = await job.generate(files, controller.signal);
+        const file = resolve(this.#options.rootDir, job.output);
+        let output = await job.generate(files, controller.signal);
+
+        if (output === null) {
+          return undefined;
+        }
+
+        if (controller.signal.aborted) {
+          return undefined;
+        }
+
+        if (typeof output === 'string' && (job.eslint ?? this.#options.eslint)) {
+          output = await this.#applyESLint(output, file);
+        }
+
+        if (controller.signal.aborted) {
+          return undefined;
+        }
+
+        if (typeof output === 'string' && (job.prettier ?? this.#options.prettier)) {
+          output = await this.#applyPrettier(output, file);
+        }
+
+        if (controller.signal.aborted) {
+          return undefined;
+        }
+
+        try {
+          await mkdir(dirname(file), { mode: 0o750, recursive: true });
+        } catch {
+          // noop
+        }
+
+        await writeFile(file, output);
+        return hash(output);
       } catch (e: any) {
         console.log(`\nError while generating '${job.output}':`);
         console.log(e);
         console.log('');
         return undefined;
       }
-
-      if (output === null) {
-        return undefined;
-      }
-
-      if (controller.signal.aborted) {
-        return undefined;
-      }
-
-      if (typeof output === 'string' && (job.eslint ?? this.#options.eslint)) {
-        output = await this.#applyESLint(output, file);
-      }
-
-      if (controller.signal.aborted) {
-        return undefined;
-      }
-
-      if (typeof output === 'string' && (job.prettier ?? this.#options.prettier)) {
-        output = await this.#applyPrettier(output, file);
-      }
-
-      if (controller.signal.aborted) {
-        return undefined;
-      }
-
-      try {
-        await mkdir(dirname(file), { mode: 0o750, recursive: true });
-      } catch {
-        // noop
-      }
-
-      await writeFile(file, output);
-      return hash(output);
     });
   }
 

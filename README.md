@@ -38,8 +38,6 @@ export default defineCodegen(
     // auto-detected based on devDependencies:
     eslint: undefined,
     prettier: undefined,
-    // global overrides for tinyglobby options:
-    glob: undefined,
   },
   // followed by one or more codegen jobs:
   {
@@ -52,19 +50,20 @@ export default defineCodegen(
 
       // now do something fun and return a Buffer or a string;
       // you can also return null, in which case nothing will be written
-      return `export const fileList = ${JSON.stringify(files)};`;
+      const fileList = files.map((file) => file.fullPath);
+      return `export const fileList = ${JSON.stringify(fileList, null, 2)};`;
     },
     // set to 'files' if your generated output is based only on
     // the list of file names, or to 'contents' if the output is
-    // based on the files' contents:
+    // based on the files' contents; leave undefined to disable cache:
     cacheBy: undefined,
     // provide an array of additional glob patterns to consider when
     // checking the cache; this can include e.g. `import.meta.filename`
     // to make the job rebuild when its definition changes
     extraDeps: undefined,
-    // you can override the global 'eslint', 'prettier',
-    // and 'glob' options per-job:
-    // prettier: false,
+    // you can override the global 'eslint' and 'prettier' options
+    // per-job, e.g.:
+    prettier: false,
   },
 );
 ```
