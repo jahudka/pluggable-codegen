@@ -1,6 +1,6 @@
 {
   "name": "pluggable-codegen",
-  "version": "0.3.4",
+  "version": "0.4.0",
   "license": "MIT",
   "homepage": "https://github.com/jahudka/pluggable-codegen",
   "repository": {
@@ -12,7 +12,7 @@
   },
   "maintainers": [
     {
-      "name": "Dan Kadera",
+      "name": "Eliška Daniela Kaderová",
       "email": "me@subsonic.cz",
       "url": "https://github.com/jahudka"
     }
@@ -66,6 +66,7 @@
     "eslint-plugin-simple-import-sort": "^13.0.0",
     "eslint-plugin-unused-imports": "^4.4.1",
     "globals": "^17.6.0",
+    "oxfmt": "^0.63.0",
     "prettier": "^3.8.3",
     "tsdown": "^0.22.0",
     "typescript": "^6.0.3",

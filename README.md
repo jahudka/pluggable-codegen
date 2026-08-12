@@ -38,6 +38,7 @@ export default defineCodegen(
     // auto-detected based on devDependencies:
     eslint: undefined,
     prettier: undefined,
+    oxfmt: undefined, // only an '.oxfmtrc.json' config file is supported for now
   },
   // followed by one or more codegen jobs:
   {
@@ -61,7 +62,7 @@ export default defineCodegen(
     // checking the cache; this can include e.g. `import.meta.filename`
     // to make the job rebuild when its definition changes
     extraDeps: undefined,
-    // you can override the global 'eslint' and 'prettier' options
+    // you can override the global 'eslint', 'prettier', and 'oxfmt' options
     // per-job, e.g.:
     prettier: false,
   },

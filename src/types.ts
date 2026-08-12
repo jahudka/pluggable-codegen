@@ -5,6 +5,7 @@ type MaybePromise<T> = Promise<T> | T;
 export type CodegenOptions = {
   rootDir?: string;
   cacheFile?: string | false;
+  oxfmt?: boolean;
   prettier?: boolean;
   eslint?: boolean;
 };
@@ -12,6 +13,7 @@ export type CodegenOptions = {
 export type NormalizedCodegenOptions = {
   rootDir: string;
   cacheFile?: string;
+  oxfmt: boolean;
   prettier: boolean;
   eslint: boolean;
 };
@@ -22,6 +24,7 @@ export type CodegenJob = {
   generate: (files: File[], signal: AbortSignal) => MaybePromise<Buffer | string | null>;
   cacheBy?: 'files' | 'contents';
   extraDeps?: string[];
+  oxfmt?: boolean;
   prettier?: boolean;
   eslint?: boolean;
 };

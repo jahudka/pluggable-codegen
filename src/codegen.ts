@@ -5,6 +5,7 @@ import { escapePath, glob } from 'tinyglobby';
 import { Cache } from './cache';
 import { File } from './file';
 import { normalizeJobs, normalizeOptions } from './options';
+import { resolveOxfmtConfig } from './oxfmt';
 import type { CodegenInput, CodegenJob, CodegenOptions, NormalizedCodegenOptions } from './types';
 import { hash } from './utils';
 
@@ -13,6 +14,7 @@ export class Codegen {
   readonly #cache: Cache;
   readonly #jobs: Map<Matcher, CodegenJob>;
   readonly #running: Map<CodegenJob, AbortController> = new Map();
+  #oxfmt?: Promise<typeof import('oxfmt')>;
   #eslint?: Promise<import('eslint').ESLint>;
   #prettier?: Promise<typeof import('prettier')>;
 
@@ -78,7 +80,19 @@ export class Codegen {
           return undefined;
         }
 
-        if (typeof output === 'string' && (job.eslint ?? this.#options.eslint)) {
+        const oxfmt = job.oxfmt ?? this.#options.oxfmt;
+        const eslint = job.eslint ?? this.#options.eslint;
+        const prettier = job.prettier ?? this.#options.prettier;
+
+        if (typeof output === 'string' && oxfmt) {
+          output = await this.#applyOxfmt(output, file);
+        }
+
+        if (controller.signal.aborted) {
+          return undefined;
+        }
+
+        if (typeof output === 'string' && !oxfmt && eslint) {
           output = await this.#applyESLint(output, file);
         }
 
@@ -86,7 +100,7 @@ export class Codegen {
           return undefined;
         }
 
-        if (typeof output === 'string' && (job.prettier ?? this.#options.prettier)) {
+        if (typeof output === 'string' && !oxfmt && prettier) {
           output = await this.#applyPrettier(output, file);
         }
 
@@ -120,6 +134,19 @@ export class Codegen {
     return files.sort().map((path) => new File(path, this.#options.rootDir));
   }
 
+  async #applyOxfmt(source: string, path: string): Promise<string> {
+    const oxfmt = await this.#loadOxfmt();
+    const config = await resolveOxfmtConfig(path);
+    const { code, errors } = await oxfmt.format(path, source, config);
+    const firstError = errors.filter((e) => e.severity === 'Error').pop();
+
+    if (firstError) {
+      throw new Error(firstError.message);
+    }
+
+    return code;
+  }
+
   async #applyESLint(source: string, path: string): Promise<string> {
     const eslint = await this.#loadESLint();
     const [result] = await eslint.lintText(source, {
@@ -138,6 +165,10 @@ export class Codegen {
       ...(options ?? {}),
       filepath: path,
     });
+  }
+
+  async #loadOxfmt(): Promise<typeof import('oxfmt')> {
+    return (this.#oxfmt ??= import('oxfmt'));
   }
 
   async #loadESLint(): Promise<import('eslint').ESLint> {

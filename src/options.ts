@@ -10,10 +10,11 @@ export async function normalizeOptions(
 
   const rootDir = resolve(options.rootDir ?? process.cwd());
   const cacheFile = await resolveCacheFile(rootDir, options.cacheFile);
+  const oxfmt = options.oxfmt ?? hasDevDep(await getPackageJson(), 'oxfmt');
   const prettier = options.prettier ?? hasDevDep(await getPackageJson(), 'prettier');
   const eslint = options.eslint ?? hasDevDep(await getPackageJson(), 'eslint');
 
-  return { rootDir, cacheFile, prettier, eslint };
+  return { rootDir, cacheFile, oxfmt, prettier, eslint };
 
   async function getPackageJson(): Promise<any> {
     return (packageJson ??= readPackageJson(rootDir));
