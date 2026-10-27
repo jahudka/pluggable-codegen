@@ -1,5 +1,6 @@
 import { mkdir, readFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
+import { type PostprocessorOptions, postprocessors } from './postprocessors';
 import type { CodegenInput, CodegenJob, CodegenOptions, NormalizedCodegenOptions } from './types';
 import { lookupPath } from './utils';
 
@@ -10,11 +11,14 @@ export async function normalizeOptions(
 
   const rootDir = resolve(options.rootDir ?? process.cwd());
   const cacheFile = await resolveCacheFile(rootDir, options.cacheFile);
-  const oxfmt = options.oxfmt ?? hasDevDep(await getPackageJson(), 'oxfmt');
-  const prettier = options.prettier ?? hasDevDep(await getPackageJson(), 'prettier');
-  const eslint = options.eslint ?? hasDevDep(await getPackageJson(), 'eslint');
+  const ppopts = {} as PostprocessorOptions;
 
-  return { rootDir, cacheFile, oxfmt, prettier, eslint };
+  for (const postprocessor of postprocessors) {
+    ppopts[postprocessor.id] =
+      options[postprocessor.id] ?? hasDevDep(await getPackageJson(), postprocessor.packageName);
+  }
+
+  return { rootDir, cacheFile, ...ppopts };
 
   async function getPackageJson(): Promise<any> {
     return (packageJson ??= readPackageJson(rootDir));

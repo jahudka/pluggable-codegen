@@ -5,7 +5,7 @@ import { escapePath, glob } from 'tinyglobby';
 import { Cache } from './cache';
 import { File } from './file';
 import { normalizeJobs, normalizeOptions } from './options';
-import { resolveOxfmtConfig } from './oxfmt';
+import { postprocessors } from './postprocessors';
 import type { CodegenInput, CodegenJob, CodegenOptions, NormalizedCodegenOptions } from './types';
 import { hash } from './utils';
 
@@ -14,9 +14,6 @@ export class Codegen {
   readonly #cache: Cache;
   readonly #jobs: Map<Matcher, CodegenJob>;
   readonly #running: Map<CodegenJob, AbortController> = new Map();
-  #oxfmt?: Promise<typeof import('oxfmt')>;
-  #eslint?: Promise<import('eslint').ESLint>;
-  #prettier?: Promise<typeof import('prettier')>;
 
   static async init(...jobs: CodegenInput[]): Promise<Codegen>;
   static async init(options: CodegenOptions, ...jobs: CodegenInput[]): Promise<Codegen>;
@@ -44,21 +41,26 @@ export class Codegen {
     this.#jobs = this.#createJobMap(jobs);
   }
 
-  async generateAll(): Promise<void> {
-    await Promise.allSettled([...this.#jobs.values()].map(async (job) => this.#generate(job)));
+  async generateAll(): Promise<boolean> {
+    const results = await Promise.all([...this.#jobs.values()].map(this.#generate));
+    await this.#cache.flush();
+    return results.every((v) => v);
   }
 
-  async generateMatching(path: string): Promise<void> {
-    await Promise.allSettled(
+  async generateMatching(path: string): Promise<boolean> {
+    const results = await Promise.all(
       [...this.#jobs].map(async ([match, job]) => {
         if (match(path)) {
           await this.#generate(job);
         }
       }),
     );
+
+    await this.#cache.flush();
+    return results.every((v) => v);
   }
 
-  async #generate(job: CodegenJob): Promise<void> {
+  readonly #generate = async (job: CodegenJob): Promise<boolean> => {
     this.#running.get(job)?.abort();
 
     const controller = new AbortController();
@@ -66,6 +68,7 @@ export class Codegen {
 
     const files = await this.#scanFiles(job.input);
     const extraDeps = job.extraDeps?.length ? await this.#scanFiles(job.extraDeps) : [];
+    let success = true;
 
     await this.#cache.check([...files, ...extraDeps], job.output, job.cacheBy, async () => {
       try {
@@ -80,28 +83,28 @@ export class Codegen {
           return undefined;
         }
 
-        const oxfmt = job.oxfmt ?? this.#options.oxfmt;
-        const eslint = job.eslint ?? this.#options.eslint;
-        const prettier = job.prettier ?? this.#options.prettier;
+        const disabled: Set<string> = new Set();
 
-        if (typeof output === 'string' && oxfmt) {
-          output = await this.#applyOxfmt(output, file);
-        }
+        for (const postprocessor of postprocessors) {
+          if (typeof output !== 'string') {
+            break;
+          }
 
-        if (controller.signal.aborted) {
-          return undefined;
-        }
+          const enabled = job[postprocessor.id] ?? this.#options[postprocessor.id];
 
-        if (typeof output === 'string' && !oxfmt && eslint) {
-          output = await this.#applyESLint(output, file);
-        }
+          if (!enabled || disabled.has(postprocessor.id)) {
+            continue;
+          }
 
-        if (controller.signal.aborted) {
-          return undefined;
-        }
+          for (const id of postprocessor.conflicts) {
+            disabled.add(id);
+          }
 
-        if (typeof output === 'string' && !oxfmt && prettier) {
-          output = await this.#applyPrettier(output, file);
+          output = await postprocessor.apply(output, file);
+
+          if (controller.signal.aborted) {
+            return undefined;
+          }
         }
 
         if (controller.signal.aborted) {
@@ -120,10 +123,13 @@ export class Codegen {
         console.log(`\nError while generating '${job.output}':`);
         console.log(e);
         console.log('');
+        success = false;
         return undefined;
       }
     });
-  }
+
+    return success;
+  };
 
   async #scanFiles(patterns: string[] | string): Promise<File[]> {
     const files = await glob(patterns, {
@@ -134,56 +140,6 @@ export class Codegen {
     return files.sort().map((path) => new File(path, this.#options.rootDir));
   }
 
-  async #applyOxfmt(source: string, path: string): Promise<string> {
-    const oxfmt = await this.#loadOxfmt();
-    const config = await resolveOxfmtConfig(path);
-    const { code, errors } = await oxfmt.format(path, source, config);
-    const firstError = errors.filter((e) => e.severity === 'Error').pop();
-
-    if (firstError) {
-      throw new Error(firstError.message);
-    }
-
-    return code;
-  }
-
-  async #applyESLint(source: string, path: string): Promise<string> {
-    const eslint = await this.#loadESLint();
-    const [result] = await eslint.lintText(source, {
-      filePath: path,
-    });
-
-    // if the file is ignored, there will not be a result
-    return result?.output ?? source;
-  }
-
-  async #applyPrettier(source: string, path: string): Promise<string> {
-    const prettier = await this.#loadPrettier();
-    const options = await prettier.resolveConfig(path);
-
-    return prettier.format(source, {
-      ...(options ?? {}),
-      filepath: path,
-    });
-  }
-
-  async #loadOxfmt(): Promise<typeof import('oxfmt')> {
-    return (this.#oxfmt ??= import('oxfmt'));
-  }
-
-  async #loadESLint(): Promise<import('eslint').ESLint> {
-    return (this.#eslint ??= import('eslint').then(
-      ({ ESLint }) =>
-        new ESLint({
-          fix: true,
-        }),
-    ));
-  }
-
-  async #loadPrettier(): Promise<typeof import('prettier')> {
-    return (this.#prettier ??= import('prettier'));
-  }
-
   #createJobMap(jobs: CodegenJob[]): Map<Matcher, CodegenJob> {
     return new Map(jobs.map((job) => [this.#createMatcher(job), job]));
   }
@@ -191,7 +147,6 @@ export class Codegen {
   #createMatcher(job: CodegenJob): Matcher {
     const root = escapePath(this.#options.rootDir);
     const patterns = [job.input, job.extraDeps ?? []];
-
     return picomatch(patterns.flat().map((pattern) => resolve(root, pattern)));
   }
 }

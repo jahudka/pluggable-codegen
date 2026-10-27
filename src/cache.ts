@@ -13,7 +13,7 @@ export class Cache {
   readonly #rootDir: string;
   readonly #cacheFile?: string;
   #cacheData?: Promise<Map<string, CacheEntry>>;
-  #writeTmr?: ReturnType<typeof setTimeout>;
+  #dirty: boolean = false;
 
   constructor(rootDir: string, cacheFile?: string) {
     this.#rootDir = rootDir;
@@ -54,8 +54,14 @@ export class Cache {
       output: newHash,
     });
 
-    clearTimeout(this.#writeTmr);
-    this.#writeTmr = setTimeout(() => this.#writeCacheData(cacheData), 250);
+    this.#dirty = true;
+  }
+
+  async flush(): Promise<void> {
+    if (this.#dirty) {
+      this.#dirty = false;
+      await this.#writeCacheData(await (this.#cacheData ??= this.#readCacheData()));
+    }
   }
 
   async #getSourceHash(files: File[], mode: 'files' | 'contents'): Promise<string> {

@@ -1,32 +1,24 @@
 import type { File } from './file';
+import type { PostprocessorOptions } from './postprocessors';
 
-type MaybePromise<T> = Promise<T> | T;
+export type MaybePromise<T> = Promise<T> | T;
 
-export type CodegenOptions = {
+export type CodegenOptions = Partial<PostprocessorOptions> & {
   rootDir?: string;
   cacheFile?: string | false;
-  oxfmt?: boolean;
-  prettier?: boolean;
-  eslint?: boolean;
 };
 
-export type NormalizedCodegenOptions = {
+export type NormalizedCodegenOptions = PostprocessorOptions & {
   rootDir: string;
   cacheFile?: string;
-  oxfmt: boolean;
-  prettier: boolean;
-  eslint: boolean;
 };
 
-export type CodegenJob = {
+export type CodegenJob = Partial<PostprocessorOptions> & {
   input: string | string[];
   output: string;
   generate: (files: File[], signal: AbortSignal) => MaybePromise<Buffer | string | null>;
   cacheBy?: 'files' | 'contents';
   extraDeps?: string[];
-  oxfmt?: boolean;
-  prettier?: boolean;
-  eslint?: boolean;
 };
 
 export type CodegenJobGenerator = (rootDir: string) => MaybePromise<CodegenJob[] | CodegenJob>;

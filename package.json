@@ -1,15 +1,11 @@
 {
   "name": "pluggable-codegen",
-  "version": "0.4.0",
-  "license": "MIT",
+  "version": "0.5.0",
   "homepage": "https://github.com/jahudka/pluggable-codegen",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/jahudka/pluggable-codegen.git"
-  },
   "bugs": {
     "url": "https://github.com/jahudka/pluggable-codegen/issues"
   },
+  "license": "MIT",
   "maintainers": [
     {
       "name": "Eliška Daniela Kaderová",
@@ -17,16 +13,20 @@
       "url": "https://github.com/jahudka"
     }
   ],
-  "files": [
-    "dist"
-  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jahudka/pluggable-codegen.git"
+  },
   "bin": {
     "pluggable-codegen": "dist/cli.mjs"
   },
+  "files": [
+    "dist"
+  ],
   "type": "module",
-  "types": "./dist/index.d.ts",
   "main": "./dist/index.cjs",
   "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -39,14 +39,35 @@
       "import": "./dist/presets/*.mjs"
     }
   },
-  "packageManager": "pnpm@10.30.1",
+  "scripts": {
+    "clean": "rm -rf dist",
+    "oxlint": "oxlint",
+    "oxlint:fix": "oxlint --fix",
+    "oxfmt": "oxfmt --check",
+    "oxfmt:fix": "oxfmt --write",
+    "lint": "pnpm run '/^(oxlint|oxfmt)$/'",
+    "format": "pnpm run --sequential '/^(oxlint|oxfmt):fix$/'",
+    "build": "tsc && tsdown"
+  },
   "dependencies": {
-    "picomatch": "^4.0.4",
-    "tinyglobby": "^0.2.16"
+    "picomatch": "^4.0.7",
+    "tinyglobby": "^0.2.17"
+  },
+  "devDependencies": {
+    "@graphql-codegen/cli": "^7.4.6",
+    "@types/node": "^24.19.2",
+    "@types/picomatch": "^4.0.3",
+    "eslint": "^10.13.0",
+    "oxfmt": "^0.75.0",
+    "oxlint": "^1.90.0",
+    "prettier": "^3.9.10",
+    "tsdown": "^0.23.2",
+    "typescript": "^6.0.3",
+    "yaml": "^2.9.1"
   },
   "peerDependencies": {
     "@graphql-codegen/cli": "^5.0.0 || ^6.0.0 || ^7.0.0",
-    "yaml": "^2.9.0"
+    "yaml": "^2.9.1"
   },
   "peerDependenciesMeta": {
     "@graphql-codegen/cli": {
@@ -56,31 +77,5 @@
       "optional": true
     }
   },
-  "devDependencies": {
-    "@eslint/js": "^10.0.1",
-    "@graphql-codegen/cli": "^7.0.0",
-    "@types/node": "^22.19.19",
-    "@types/picomatch": "^4.0.3",
-    "eslint": "^10.4.0",
-    "eslint-config-prettier": "^10.1.8",
-    "eslint-plugin-simple-import-sort": "^13.0.0",
-    "eslint-plugin-unused-imports": "^4.4.1",
-    "globals": "^17.6.0",
-    "oxfmt": "^0.63.0",
-    "prettier": "^3.8.3",
-    "tsdown": "^0.22.0",
-    "typescript": "^6.0.3",
-    "typescript-eslint": "^8.59.3",
-    "yaml": "^2.9.0"
-  },
-  "scripts": {
-    "clean": "rm -rf dist",
-    "eslint": "eslint .",
-    "eslint:fix": "eslint --fix .",
-    "prettier": "prettier --check .",
-    "prettier:fix": "prettier --write .",
-    "lint": "pnpm run '/^(eslint|prettier)$/'",
-    "format": "pnpm run --sequential '/^(eslint|prettier):fix$/'",
-    "build": "tsc && tsdown"
-  }
+  "packageManager": "pnpm@11.1.2"
 }

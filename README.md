@@ -82,9 +82,9 @@ Within a bundler config, such as `vite.config.ts`, you would just use
 the `codegen()` plugin instead of the `defineCodegen()` typing helper:
 
 ```typescript
+import { codegen } from 'pluggable-codegen';
 // vite.config.ts
 import { defineConfig } from 'vite';
-import { codegen } from 'pluggable-codegen';
 
 export default defineConfig({
   plugins: [
@@ -100,8 +100,8 @@ and before `svelte-check`:
 ```typescript
 // vite.config.ts
 
-import { defineConfig } from 'vite';
 import { codegen } from 'pluggable-codegen';
+import { defineConfig } from 'vite';
 import codegenConfig from './codegen.config';
 
 export default defineConfig({

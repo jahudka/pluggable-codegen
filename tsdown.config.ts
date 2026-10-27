@@ -17,7 +17,7 @@ function mkConfig(format: Format, ...entry: string[]): UserConfig {
     minify: false,
     unbundle: true,
     deps: {
-      skipNodeModulesBundle: true,
+      neverBundle: true,
     },
   };
 }

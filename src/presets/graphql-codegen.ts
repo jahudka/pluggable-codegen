@@ -33,7 +33,7 @@ export function graphqlCodegen(options: GraphqlCodegenOptions = {}) {
         input,
         output,
         cacheBy: 'contents',
-        extraDeps: [context.filepath],
+        extraDeps: context.filepath?.length ? [context.filepath] : [],
         generate: async (files) => {
           const [generatedFile] = await generate(
             {

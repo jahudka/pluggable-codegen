@@ -7,7 +7,7 @@ import { lookupPath } from './utils';
 
 const configFiles = ['codegen.config.mjs', 'codegen.config.cjs', 'codegen.config.js'];
 
-(async () => {
+void (async () => {
   const config =
     process.argv.length > 2
       ? await importConfig(resolve(process.argv[2]))
@@ -15,16 +15,21 @@ const configFiles = ['codegen.config.mjs', 'codegen.config.cjs', 'codegen.config
 
   if (!config) {
     console.log(`Usage: pluggable-codegen [config]`);
-    process.exit(1);
+    process.exitCode = 1;
+    return;
   }
 
   if (!validateConfig(config)) {
     console.log(`Invalid config`);
-    process.exit(1);
+    process.exitCode = 1;
+    return;
   }
 
   const codegen = await Codegen.init(...config);
-  await codegen.generateAll();
+
+  if (!(await codegen.generateAll())) {
+    process.exitCode = 1;
+  }
 })();
 
 async function importConfig(path: string): Promise<any> {
