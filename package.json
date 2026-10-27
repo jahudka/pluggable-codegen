@@ -1,6 +1,6 @@
 {
   "name": "pluggable-codegen",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "homepage": "https://github.com/jahudka/pluggable-codegen",
   "bugs": {
     "url": "https://github.com/jahudka/pluggable-codegen/issues"
@@ -24,19 +24,30 @@
     "dist"
   ],
   "type": "module",
+  "sideEffects": false,
   "main": "./dist/index.cjs",
   "module": "./dist/index.mjs",
-  "types": "./dist/index.d.ts",
+  "types": "./dist/index.d.mts",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "require": "./dist/index.cjs",
-      "import": "./dist/index.mjs"
+      "types": {
+        "require": "./dist/index.d.cts",
+        "import": "./dist/index.d.mts"
+      },
+      "default": {
+        "require": "./dist/index.cjs",
+        "import": "./dist/index.mjs"
+      }
     },
     "./presets/*": {
-      "types": "./dist/presets/*.d.ts",
-      "require": "./dist/presets/*.cjs",
-      "import": "./dist/presets/*.mjs"
+      "types": {
+        "require": "./dist/presets/*.d.cts",
+        "import": "./dist/presets/*.d.mts"
+      },
+      "default": {
+        "require": "./dist/presets/*.cjs",
+        "import": "./dist/presets/*.mjs"
+      }
     }
   },
   "scripts": {
@@ -47,7 +58,8 @@
     "oxfmt:fix": "oxfmt --write",
     "lint": "pnpm run '/^(oxlint|oxfmt)$/'",
     "format": "pnpm run --sequential '/^(oxlint|oxfmt):fix$/'",
-    "build": "tsc && tsdown"
+    "build": "tsc && tsdown",
+    "publint": "publint"
   },
   "dependencies": {
     "picomatch": "^4.0.7",
@@ -61,6 +73,7 @@
     "oxfmt": "^0.75.0",
     "oxlint": "^1.90.0",
     "prettier": "^3.9.10",
+    "publint": "^0.3.25",
     "tsdown": "^0.23.2",
     "typescript": "^6.0.3",
     "yaml": "^2.9.1"
@@ -76,6 +89,9 @@
     "yaml": {
       "optional": true
     }
+  },
+  "engines": {
+    "node": ">=24"
   },
   "packageManager": "pnpm@11.1.2"
 }

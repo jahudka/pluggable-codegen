@@ -28,6 +28,8 @@ jobs:
         run: pnpm lint
       - name: Build packages
         run: pnpm build
+      - name: Lint packages
+        run: pnpm publint
       - name: Publish packages
         if: github.ref_name == 'main'
         run: pnpm publish

@@ -13,7 +13,7 @@ function mkConfig(format: Format, ...entry: string[]): UserConfig {
     entry,
     platform: 'node',
     format,
-    dts: format === 'esm',
+    dts: true,
     minify: false,
     unbundle: true,
     deps: {
